@@ -6,16 +6,32 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "fix:deps": "./scripts/fix-deps.sh",
+    "check:deps": "pnpm dlx syncpack list-mismatches && pnpm dedupe --check",
+    "clean": "turbo clean && rm -rf node_modules .turbo pnpm-lock.yaml"
   },
   "devDependencies": {
-    "@configs/eslint-config": "workspace:*",
-    "@configs/typescript-config": "workspace:*",
-    "@workspace/di": "workspace:*",
+    "@configs/eslint-config": "0.0.1",
+    "@configs/typescript-config": "0.0.1",
+    "@workspace/di": "0.0.1",
+    "depcheck": "^1.4.7",
     "prettier": "^3.6.2",
-    "tsup": "^8.5.0",
+    "syncpack": "^13.0.4",
+    "tsyringe": "^4.10.0",
     "turbo": "^2.5.5",
-    "typescript": "5.7.3"
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@apps/*": "workspace:*",
+      "@workspace/*": "workspace:*",
+      "@artifacts/*": "workspace:*",
+      "@configs/*": "workspace:*"
+    },
+    "hoistPattern": [
+      "*"
+    ]
   },
   "packageManager": "pnpm@10.4.1",
   "engines": {

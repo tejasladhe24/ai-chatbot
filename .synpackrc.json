@@ -1,0 +1,20 @@
+{
+  "semverRange": "^",
+  "workspace": {
+    "use": "workspace:*",
+    "bumpStrategy": "ignore"
+  },
+  "versionGroups": [
+    {
+      "label": "Ignore workspace packages",
+      "dependencies": ["@apps/", "@workspace/", "@artifacts/", "@configs/"],
+      "isIgnored": true
+    },
+    {
+      "label": "Default group",
+      "dependencies": ["**"],
+      "packages": ["**"]
+    }
+  ],
+  "sortAz": ["dependencies", "devDependencies", "peerDependencies"]
+}

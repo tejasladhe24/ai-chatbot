@@ -24,12 +24,12 @@
     "@types/papaparse": "^5.5.0",
     "@types/uuid": "^11.0.0",
     "@vercel/blob": "^2.0.0",
-    "@workspace/ai": "workspace:^0.0.1",
-    "@workspace/artifact": "workspace:^0.0.1",
-    "@workspace/database": "workspace:^0.0.1",
-    "@workspace/di": "workspace:^0.0.1",
-    "@workspace/icons": "workspace:^0.0.1",
-    "@workspace/ui": "workspace:*",
+    "@workspace/ai": "0.0.1",
+    "@workspace/artifact": "0.0.1",
+    "@workspace/database": "0.0.1",
+    "@workspace/di": "0.0.1",
+    "@workspace/icons": "0.0.1",
+    "@workspace/ui": "0.0.1",
     "better-auth": "^1.3.34",
     "codemirror": "^6.0.2",
     "date-fns": "^4.1.0",
@@ -70,13 +70,13 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@configs/eslint-config": "workspace:^",
-    "@configs/typescript-config": "workspace:*",
+    "@configs/eslint-config": "0.0.1",
+    "@configs/typescript-config": "0.0.1",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@types/node": "^20.19.9",
     "@types/pg": "^8.15.6",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }

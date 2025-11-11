@@ -12,11 +12,11 @@
     "clean": "rm -rf node_modules .turbo dist"
   },
   "dependencies": {
-    "@workspace/di": "workspace:0.0.1"
+    "@workspace/di": "0.0.1"
   },
   "devDependencies": {
-    "@configs/eslint-config": "0.0.0",
-    "@configs/typescript-config": "0.0.0",
+    "@configs/eslint-config": "0.0.1",
+    "@configs/typescript-config": "0.0.1",
     "drizzle-kit": "^0.31.6",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3"
