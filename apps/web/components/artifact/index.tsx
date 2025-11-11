@@ -21,7 +21,6 @@ import { MultimodalInput } from "../chat/multimodal-input";
 import { Toolbar } from "./toolbar";
 import { VersionFooter } from "./version-footer";
 import { DBDocument, DBVisibility, DBVote } from "@workspace/database/types";
-import { useSidebar } from "@workspace/ui/components/sidebar";
 import { Attachment, ChatMessage } from "@workspace/ai";
 import { artifactDefinitions } from "@/artifacts/artifact-definitions";
 
@@ -74,8 +73,6 @@ function PureArtifact({
   const [mode, setMode] = useState<"edit" | "diff">("edit");
   const [document, setDocument] = useState<DBDocument | null>(null);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
-
-  const { open: isSidebarOpen } = useSidebar();
 
   useEffect(() => {
     if (documents && documents.length > 0) {
@@ -248,11 +245,11 @@ function PureArtifact({
               animate={{ width: windowWidth, right: 0 }}
               className="fixed h-dvh bg-background"
               exit={{
-                width: isSidebarOpen ? windowWidth - 256 : windowWidth,
+                width: windowWidth,
                 right: 0,
               }}
               initial={{
-                width: isSidebarOpen ? windowWidth - 256 : windowWidth,
+                width: windowWidth,
                 right: 0,
               }}
             />

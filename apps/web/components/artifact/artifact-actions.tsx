@@ -7,6 +7,7 @@ import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 
@@ -50,43 +51,45 @@ function PureArtifactActions({
   };
 
   return (
-    <div className="flex flex-row gap-1">
-      {artifactDefinition.actions.map((action) => (
-        <Tooltip key={action.description}>
-          <TooltipTrigger asChild>
-            <Button
-              className={cn("h-fit dark:hover:bg-zinc-700", {
-                "p-2": !action.label,
-                "px-2 py-1.5": action.label,
-              })}
-              disabled={
-                isLoading || artifact.status === "streaming"
-                  ? true
-                  : action.isDisabled
-                    ? action.isDisabled(actionContext)
-                    : false
-              }
-              onClick={async () => {
-                setIsLoading(true);
-
-                try {
-                  await Promise.resolve(action.onClick(actionContext));
-                } catch (_error) {
-                  toast.error("Failed to execute action");
-                } finally {
-                  setIsLoading(false);
+    <TooltipProvider>
+      <div className="flex flex-row gap-1">
+        {artifactDefinition.actions.map((action) => (
+          <Tooltip key={action.description}>
+            <TooltipTrigger asChild>
+              <Button
+                className={cn("h-fit dark:hover:bg-zinc-700", {
+                  "p-2": !action.label,
+                  "px-2 py-1.5": action.label,
+                })}
+                disabled={
+                  isLoading || artifact.status === "streaming"
+                    ? true
+                    : action.isDisabled
+                      ? action.isDisabled(actionContext)
+                      : false
                 }
-              }}
-              variant="outline"
-            >
-              {action.icon}
-              {action.label}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{action.description}</TooltipContent>
-        </Tooltip>
-      ))}
-    </div>
+                onClick={async () => {
+                  setIsLoading(true);
+
+                  try {
+                    await Promise.resolve(action.onClick(actionContext));
+                  } catch (_error) {
+                    toast.error("Failed to execute action");
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                variant="outline"
+              >
+                {action.icon}
+                {action.label}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{action.description}</TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
+    </TooltipProvider>
   );
 }
 

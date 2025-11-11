@@ -1,37 +1,37 @@
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { cookies, headers } from "next/headers";
 import { Chat } from "@/components/chat";
 import { DEFAULT_CHAT_MODEL } from "@workspace/ai";
 import { generateUUID } from "@/lib/utils";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { AIChatProvider } from "@/components/provider/ai-chat-provider";
 
 export default async function Page() {
-  const session = await auth.api.getSession({
+  const sessionPromise = await auth.api.getSession({
     headers: await headers(),
   });
+
+  const chatModelFromCookiePromise = cookies().then((cookies) =>
+    cookies.get("chat-model")
+  );
+
+  const [session, chatModelFromCookie] = await Promise.all([
+    sessionPromise,
+    chatModelFromCookiePromise,
+  ]);
 
   if (!session) {
     return notFound();
   }
 
-  const id = generateUUID();
-
-  const cookieStore = await cookies();
-  const modelIdFromCookie = cookieStore.get("chat-model");
-
   return (
-    <AIChatProvider>
-      <Chat
-        autoResume={true}
-        id={id}
-        initialChatModel={modelIdFromCookie?.value ?? DEFAULT_CHAT_MODEL}
-        initialLastContext={undefined}
-        initialMessages={[]}
-        initialVisibilityType="private"
-        isReadonly={false}
-      />
-    </AIChatProvider>
+    <Chat
+      id={generateUUID()}
+      initialMessages={[]}
+      initialChatModel={chatModelFromCookie?.value ?? DEFAULT_CHAT_MODEL}
+      initialVisibilityType="private"
+      isReadonly={false}
+      autoResume={false}
+      initialLastContext={undefined}
+    />
   );
 }

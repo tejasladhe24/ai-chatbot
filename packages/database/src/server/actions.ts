@@ -1,5 +1,6 @@
 "use server";
 
+import { container } from "@workspace/di";
 import { DatabaseService } from "./db";
 
 export async function updateChatVisibility({
@@ -9,8 +10,6 @@ export async function updateChatVisibility({
   chatId: string;
   visibility: "private" | "public";
 }) {
-  const { container } = await import("@workspace/di");
-
   const databaseService = container.resolve<DatabaseService>("db");
 
   if (!databaseService) {

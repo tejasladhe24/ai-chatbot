@@ -1,22 +1,17 @@
 "use client";
 
-import { type ReactNode, useMemo, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@workspace/ui/components/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import { cn } from "@workspace/ui/lib/utils";
-import {
-  CheckCircleIcon,
-  ChevronDownIcon,
-  GlobeIcon,
-  LockIcon,
-} from "@workspace/icons/lucide";
+import { GlobeIcon, LockIcon } from "@workspace/icons/lucide";
 import type { DBVisibility } from "@workspace/database/types";
+import { SwitchWithIcons } from "@workspace/ui/components/shadcn-studio/switch/switch-12";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 
 const visibilities: Array<{
   id: DBVisibility;
@@ -40,70 +35,45 @@ const visibilities: Array<{
 
 export function VisibilitySelector({
   chatId,
-  className,
   selectedVisibilityType,
 }: {
   chatId: string;
   selectedVisibilityType: DBVisibility;
 } & React.ComponentProps<typeof Button>) {
-  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId,
     initialVisibilityType: selectedVisibilityType,
   });
 
-  const selectedVisibility = useMemo(
-    () => visibilities.find((visibility) => visibility.id === visibilityType),
-    [visibilityType]
-  );
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <DropdownMenu onOpenChange={setOpen} open={open}>
-      <DropdownMenuTrigger
-        asChild
-        className={cn(
-          "w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-          className
-        )}
-      >
-        <Button
-          className="hidden h-8 md:flex md:h-fit md:px-2"
-          data-testid="visibility-selector"
-          variant="outline"
-        >
-          {selectedVisibility?.icon}
-          <span className="md:sr-only">{selectedVisibility?.label}</span>
-          <ChevronDownIcon />
-        </Button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="start" className="min-w-[300px]">
-        {visibilities.map((visibility) => (
-          <DropdownMenuItem
-            className="group/item flex flex-row items-center justify-between gap-4"
-            data-active={visibility.id === visibilityType}
-            data-testid={`visibility-selector-item-${visibility.id}`}
-            key={visibility.id}
-            onSelect={() => {
-              setVisibilityType(visibility.id);
-              setOpen(false);
-            }}
-          >
-            <div className="flex flex-col items-start gap-1">
-              {visibility.label}
-              {visibility.description && (
-                <div className="text-muted-foreground text-xs">
-                  {visibility.description}
-                </div>
-              )}
-            </div>
-            <div className="text-foreground opacity-0 group-data-[active=true]/item:opacity-100 dark:text-foreground">
-              <CheckCircleIcon />
-            </div>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SwitchWithIcons
+              labels={{
+                checked: GlobeIcon,
+                unchecked: LockIcon,
+              }}
+              defaultChecked={visibilityType === "public"}
+              onCheckedChange={(checked) =>
+                setVisibilityType(checked ? "public" : "private")
+              }
+            />
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {visibilities.find((v) => v.id === visibilityType)?.description}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
   );
 }

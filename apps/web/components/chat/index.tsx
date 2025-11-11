@@ -8,16 +8,10 @@ import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { ChatHeader } from "./chat-header";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@workspace/ui/components/alert-dialog";
-import { useArtifactSelector } from "@/hooks/use-artifact";
+  initialArtifactData,
+  useArtifact,
+  useArtifactSelector,
+} from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { DBChat, DBVote } from "@workspace/database/types";
@@ -29,8 +23,9 @@ import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { toast } from "sonner";
 import type { DBVisibility } from "@workspace/database/types";
-import { useAIChatContext } from "../provider/ai-chat-provider";
 import { getPaginationKey } from "@workspace/database/common";
+import { useDataStream } from "../provider/data-stream-provider";
+import { artifactDefinitions } from "@/artifacts/artifact-definitions";
 
 export function Chat({
   id,
@@ -55,13 +50,15 @@ export function Chat({
   });
 
   const { mutate } = useSWRConfig();
-  const { setDataStream } = useAIChatContext();
 
-  const [input, setInput] = useState<string>("");
-  const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
-  const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
+  const { dataStream, setDataStream } = useDataStream();
+  const { artifact, setArtifact, setMetadata } = useArtifact();
+
   const [currentModelId, setCurrentModelId] = useState(initialChatModel);
+  const [input, setInput] = useState("");
+  const [usage, setUsage] = useState<AppUsage | undefined>(undefined);
   const currentModelIdRef = useRef(currentModelId);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
@@ -107,13 +104,7 @@ export function Chat({
     onError: (error) => {
       if (error instanceof ChatSDKError) {
         // Check if it's a credit card error
-        if (
-          error.message?.includes("AI Gateway requires a valid credit card")
-        ) {
-          setShowCreditCardAlert(true);
-        } else {
-          toast.error(error.message);
-        }
+        toast.error(error.message);
       }
     },
   });
@@ -140,7 +131,6 @@ export function Chat({
     fetcher
   );
 
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
   useAutoResume({
@@ -150,14 +140,79 @@ export function Chat({
     setMessages,
   });
 
+  useEffect(() => {
+    if (!dataStream?.length) {
+      return;
+    }
+
+    const newDeltas = dataStream.slice();
+    setDataStream([]);
+
+    for (const delta of newDeltas) {
+      const artifactDefinition = artifactDefinitions.find(
+        (currentArtifactDefinition) =>
+          currentArtifactDefinition.kind === artifact.kind
+      );
+
+      if (artifactDefinition?.onStreamPart) {
+        artifactDefinition.onStreamPart({
+          streamPart: delta,
+          setArtifact,
+          setMetadata,
+        });
+      }
+
+      setArtifact((draftArtifact) => {
+        if (!draftArtifact) {
+          return { ...initialArtifactData, status: "streaming" };
+        }
+
+        switch (delta.type) {
+          case "data-id":
+            return {
+              ...draftArtifact,
+              documentId: delta.data,
+              status: "streaming",
+            };
+
+          case "data-title":
+            return {
+              ...draftArtifact,
+              title: delta.data,
+              status: "streaming",
+            };
+
+          case "data-kind":
+            return {
+              ...draftArtifact,
+              kind: delta.data,
+              status: "streaming",
+            };
+
+          case "data-clear":
+            return {
+              ...draftArtifact,
+              content: "",
+              status: "streaming",
+            };
+
+          case "data-finish":
+            return {
+              ...draftArtifact,
+              status: "idle",
+            };
+
+          default:
+            return draftArtifact;
+        }
+      });
+    }
+  }, [dataStream, setArtifact, setMetadata, artifact]);
+
   return (
     <>
       <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
-        <ChatHeader
-          chatId={id}
-          isReadonly={isReadonly}
-          selectedVisibilityType={initialVisibilityType}
-        />
+        <ChatHeader />
 
         <Messages
           chatId={id}
@@ -210,36 +265,6 @@ export function Chat({
         stop={stop}
         votes={votes}
       />
-
-      <AlertDialog
-        onOpenChange={setShowCreditCardAlert}
-        open={showCreditCardAlert}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Activate AI Gateway</AlertDialogTitle>
-            <AlertDialogDescription>
-              This application requires{" "}
-              {process.env.NODE_ENV === "production" ? "the owner" : "you"} to
-              activate Vercel AI Gateway.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                window.open(
-                  "https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card",
-                  "_blank"
-                );
-                window.location.href = "/";
-              }}
-            >
-              Activate
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

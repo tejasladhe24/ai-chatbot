@@ -12,7 +12,6 @@ import {
 } from "@workspace/ui/components/elements/conversation";
 import { Greeting } from "./greeting";
 import { PreviewMessage, ThinkingMessage } from "./message";
-import { useAIChatContext } from "../provider/ai-chat-provider";
 
 type MessagesProps = {
   chatId: string;
@@ -34,7 +33,6 @@ function PureMessages({
   setMessages,
   regenerate,
   isReadonly,
-  selectedModelId,
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -45,8 +43,6 @@ function PureMessages({
   } = useMessages({
     status,
   });
-
-  const { dataStream: _, setDataStream: __ } = useAIChatContext();
 
   useEffect(() => {
     if (status === "submitted") {

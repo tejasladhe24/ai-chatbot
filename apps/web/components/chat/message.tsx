@@ -24,7 +24,6 @@ import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
 import { DBVote } from "@workspace/database/types";
 import { cn } from "@workspace/ui/lib/utils";
-import { useAIChatContext } from "../provider/ai-chat-provider";
 
 const PurePreviewMessage = ({
   chatId,
@@ -45,8 +44,6 @@ const PurePreviewMessage = ({
   isReadonly: boolean;
   requiresScrollPadding: boolean;
 }) => {
-  const { dataStream: _, setDataStream: __ } = useAIChatContext();
-
   const [mode, setMode] = useState<"view" | "edit">("view");
 
   const attachmentsFromMessage = message.parts.filter(

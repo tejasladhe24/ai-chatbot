@@ -7,8 +7,8 @@ export default defineConfig({
   dts: true,
   splitting: false,
   sourcemap: false,
+  external: ["drizzle-orm", "@workspace/di"],
   clean: true,
-  external: ["drizzle-orm"],
   outExtension: ({ format }) => ({
     js: format === "esm" ? ".js" : ".cjs",
   }),

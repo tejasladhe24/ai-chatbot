@@ -1,6 +1,6 @@
 "use client";
 
-import { useAIChatContext } from "@/components/provider/ai-chat-provider";
+import { useDataStream } from "@/components/provider/data-stream-provider";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { ChatMessage } from "@workspace/ai";
 import { useEffect } from "react";
@@ -18,7 +18,7 @@ export function useAutoResume({
   resumeStream,
   setMessages,
 }: UseAutoResumeParams) {
-  const { dataStream } = useAIChatContext();
+  const { dataStream } = useDataStream();
 
   useEffect(() => {
     if (!autoResume) {

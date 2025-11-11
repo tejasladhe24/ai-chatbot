@@ -16,13 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
-import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  useSidebar,
-} from "@workspace/ui/components/sidebar";
-import type { DBChat, DBUser } from "@workspace/database/types";
+import type { DBChat } from "@workspace/database/types";
 import { fetcher } from "@/lib/utils";
 import { LoaderIcon } from "@workspace/icons/lucide";
 import { ChatItem } from "./history-item";
@@ -70,8 +64,7 @@ const groupChatsByDate = (chats: DBChat[]): GroupedChats => {
   );
 };
 
-export function SidebarHistory() {
-  const { setOpenMobile } = useSidebar();
+export function NavHistory() {
   const { id } = useParams();
   const { data, isPending } = authClient.useSession();
 
@@ -132,23 +125,19 @@ export function SidebarHistory() {
 
   if (!data?.user) {
     return (
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-            Login to save and revisit previous chats!
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
+        Login to save and revisit previous chats!
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <SidebarGroup>
+      <div className="flex flex-col gap-2">
         <div className="px-2 py-1 text-sidebar-foreground/50 text-xs">
           Today
         </div>
-        <SidebarGroupContent>
+        <div className="flex flex-col gap-2">
           <div className="flex flex-col">
             {[44, 32, 28, 64, 52].map((item) => (
               <div
@@ -166,28 +155,26 @@ export function SidebarHistory() {
               </div>
             ))}
           </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
+        </div>
+      </div>
     );
   }
 
   if (hasEmptyChatHistory) {
     return (
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-            Your conversations will appear here once you start chatting!
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <div className="flex flex-col gap-2">
+        <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
+          Your conversations will appear here once you start chatting!
+        </div>
+      </div>
     );
   }
 
   return (
     <>
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenu>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             {paginatedChatHistories &&
               (() => {
                 const chatsFromHistory = paginatedChatHistories.flatMap(
@@ -212,7 +199,6 @@ export function SidebarHistory() {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
-                            setOpenMobile={setOpenMobile}
                           />
                         ))}
                       </div>
@@ -232,7 +218,6 @@ export function SidebarHistory() {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
-                            setOpenMobile={setOpenMobile}
                           />
                         ))}
                       </div>
@@ -252,7 +237,6 @@ export function SidebarHistory() {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
-                            setOpenMobile={setOpenMobile}
                           />
                         ))}
                       </div>
@@ -272,7 +256,6 @@ export function SidebarHistory() {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
-                            setOpenMobile={setOpenMobile}
                           />
                         ))}
                       </div>
@@ -292,7 +275,6 @@ export function SidebarHistory() {
                               setDeleteId(chatId);
                               setShowDeleteDialog(true);
                             }}
-                            setOpenMobile={setOpenMobile}
                           />
                         ))}
                       </div>
@@ -300,7 +282,7 @@ export function SidebarHistory() {
                   </div>
                 );
               })()}
-          </SidebarMenu>
+          </div>
 
           <motion.div
             onViewportEnter={() => {
@@ -322,8 +304,8 @@ export function SidebarHistory() {
               <div>Loading Chats...</div>
             </div>
           )}
-        </SidebarGroupContent>
-      </SidebarGroup>
+        </div>
+      </div>
 
       <AlertDialog onOpenChange={setShowDeleteDialog} open={showDeleteDialog}>
         <AlertDialogContent>

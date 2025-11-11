@@ -1,3 +1,4 @@
+import { container } from "@workspace/di";
 import { tool, type UIMessageStreamWriter } from "ai";
 import { z } from "zod";
 import { DocumentHandler, type ChatMessage } from "../types";
@@ -44,8 +45,6 @@ export const createDocument = ({ memberId, dataStream }: CreateDocumentProps) =>
         data: null,
         transient: true,
       });
-
-      const { container } = await import("@workspace/di");
 
       const handlers =
         container.resolveAll<DocumentHandler<DBArtifactKind>>(

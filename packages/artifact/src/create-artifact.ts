@@ -11,6 +11,7 @@ import type {
 import type { DBArtifactKind, DBSuggestion } from "@workspace/database/types";
 import type { UIArtifact } from "./types";
 import { DatabaseService } from "@workspace/database/server";
+import { container } from "@workspace/di";
 
 export type ArtifactActionContext<M = any> = {
   content: string;
@@ -107,8 +108,6 @@ export function createDocumentHandler<T extends DBArtifactKind>(config: {
   return {
     kind: config.kind,
     onCreateDocument: async (args: CreateDocumentCallbackProps) => {
-      const { container } = await import("@workspace/di");
-
       const databaseService = container.resolve<DatabaseService>("db");
 
       if (!databaseService) {
@@ -135,8 +134,6 @@ export function createDocumentHandler<T extends DBArtifactKind>(config: {
       return;
     },
     onUpdateDocument: async (args: UpdateDocumentCallbackProps) => {
-      const { container } = await import("@workspace/di");
-
       const databaseService = container.resolve<DatabaseService>("db");
 
       if (!databaseService) {

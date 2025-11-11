@@ -6,7 +6,6 @@ import { databaseService } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Chat } from "@/components/chat";
 import { AppUsage, DEFAULT_CHAT_MODEL } from "@workspace/ai";
-import { AIChatProvider } from "@/components/provider/ai-chat-provider";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -50,23 +49,14 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const chatModelFromCookie = cookieStore.get("chat-model");
 
   return (
-    <AIChatProvider
-      chatId={chat.id}
+    <Chat
+      id={chat.id}
       initialChatModel={chatModelFromCookie?.value ?? DEFAULT_CHAT_MODEL}
       initialLastContext={(chat.lastContext as AppUsage) ?? undefined}
       initialVisibilityType={chat.visibility}
       initialMessages={uiMessages}
-      initialIsReadonly={member.id !== chat.memberId}
-    >
-      <Chat
-        autoResume={true}
-        id={chat.id}
-        initialChatModel={chatModelFromCookie?.value ?? DEFAULT_CHAT_MODEL}
-        initialLastContext={(chat.lastContext as AppUsage) ?? undefined}
-        initialMessages={uiMessages}
-        initialVisibilityType={chat.visibility}
-        isReadonly={member.id !== chat.memberId}
-      />
-    </AIChatProvider>
+      isReadonly={member.id !== chat.memberId}
+      autoResume={false}
+    />
   );
 }

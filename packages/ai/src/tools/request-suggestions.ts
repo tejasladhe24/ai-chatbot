@@ -4,6 +4,7 @@ import { type DBSuggestion } from "@workspace/database/types";
 import { DatabaseService } from "@workspace/database/server";
 import { ChatMessage } from "@/types";
 import { nanoid } from "nanoid";
+import { container } from "@workspace/di";
 
 type RequestSuggestionsProps = {
   memberId: string;
@@ -22,11 +23,6 @@ export const requestSuggestions = ({
         .describe("The ID of the document to request edits"),
     }),
     execute: async ({ documentId }) => {
-      const { container } = await import("@workspace/di");
-      if (!container) {
-        throw new Error("Container not found");
-      }
-
       const databaseService = container.resolve<DatabaseService>("db");
 
       const document = await databaseService.getDocumentById({

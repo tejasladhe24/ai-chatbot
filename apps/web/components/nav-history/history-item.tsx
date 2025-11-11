@@ -19,23 +19,18 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import {
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@workspace/ui/components/sidebar";
 import type { DBChat } from "@workspace/database/types";
+import { Button, buttonVariants } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 
 const PureChatItem = ({
   chat,
   isActive,
   onDelete,
-  setOpenMobile,
 }: {
   chat: DBChat;
   isActive: boolean;
   onDelete: (chatId: string) => void;
-  setOpenMobile: (open: boolean) => void;
 }) => {
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
@@ -43,22 +38,27 @@ const PureChatItem = ({
   });
 
   return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive}>
-        <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
-          <span>{chat.title}</span>
-        </Link>
-      </SidebarMenuButton>
+    <div className="flex flex-col gap-2">
+      <Link
+        href={`/chat/${chat.id}`}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "sm" }),
+          isActive && "bg-accent"
+        )}
+      >
+        <span className="text-sm truncate">{chat.title}</span>
+      </Link>
 
       <DropdownMenu modal={true}>
         <DropdownMenuTrigger asChild>
-          <SidebarMenuAction
-            className="mr-0.5 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            showOnHover={!isActive}
+          <Button
+            className={cn("mr-0.5 size-fit p-1", isActive && "bg-accent")}
+            variant="ghost"
+            size="icon"
           >
             <MoreHorizontalIcon />
             <span className="sr-only">More</span>
-          </SidebarMenuAction>
+          </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" side="bottom">
@@ -106,7 +106,7 @@ const PureChatItem = ({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </SidebarMenuItem>
+    </div>
   );
 };
 

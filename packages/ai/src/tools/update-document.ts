@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { ChatMessage, DocumentHandler } from "@/types";
 import { type DBArtifactKind } from "@workspace/database/types";
 import { DatabaseService } from "@workspace/database/server";
+import { container } from "@workspace/di";
 
 type UpdateDocumentProps = {
   memberId: string;
@@ -19,8 +20,6 @@ export const updateDocument = ({ memberId, dataStream }: UpdateDocumentProps) =>
         .describe("The description of changes that need to be made"),
     }),
     execute: async ({ id, description }) => {
-      const { container } = await import("@workspace/di");
-
       const databaseService = container.resolve<DatabaseService>("db");
 
       if (!databaseService) {
