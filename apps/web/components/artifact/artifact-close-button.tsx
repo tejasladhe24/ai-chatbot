@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
-import { CrossIcon } from "@workspace/icons/lucide";
+import { XIcon } from "@workspace/icons/lucide";
 import { Button } from "@workspace/ui/components/button";
 
 function PureArtifactCloseButton() {
@@ -22,7 +22,7 @@ function PureArtifactCloseButton() {
       }}
       variant="outline"
     >
-      <CrossIcon size={18} />
+      <XIcon size={18} />
     </Button>
   );
 }

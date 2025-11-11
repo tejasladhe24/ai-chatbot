@@ -1,6 +1,7 @@
+"use client";
+
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { formatDistance } from "date-fns";
-import equal from "fast-deep-equal";
 import { AnimatePresence } from "framer-motion";
 import {
   type Dispatch,
@@ -12,7 +13,6 @@ import {
 } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useDebounceCallback } from "usehooks-ts";
-import { useArtifact, initialArtifactData } from "@/hooks/use-artifact";
 import { fetcher } from "@/lib/utils";
 import { ArtifactActions } from "./artifact-actions";
 import { Toolbar } from "./toolbar";
@@ -22,49 +22,61 @@ import { Attachment, ChatMessage } from "@workspace/ai";
 import { artifactDefinitions } from "@/artifacts/artifact-definitions";
 import { Window } from "../window";
 import { useWindowManager } from "../provider/window-manager-provider";
+import type { UIArtifact } from "@workspace/artifact";
+import { initialArtifactData } from "@/hooks/use-artifact";
 
-function PureArtifact({
-  chatId,
-  input,
+type ArtifactWindowProps = {
+  windowId: string;
+  artifact: UIArtifact;
+  chatId?: string;
+  input?: string;
+  setInput?: Dispatch<SetStateAction<string>>;
+  status?: UseChatHelpers<ChatMessage>["status"];
+  stop?: UseChatHelpers<ChatMessage>["stop"];
+  attachments?: Attachment[];
+  setAttachments?: Dispatch<SetStateAction<Attachment[]>>;
+  sendMessage?: UseChatHelpers<ChatMessage>["sendMessage"];
+  messages?: ChatMessage[];
+  setMessages?: UseChatHelpers<ChatMessage>["setMessages"];
+  regenerate?: UseChatHelpers<ChatMessage>["regenerate"];
+  votes?: DBVote[] | undefined;
+  isReadonly?: boolean;
+  selectedVisibilityType?: DBVisibility;
+  selectedModelId?: string;
+};
+
+function PureArtifactWindow({
+  windowId,
+  artifact,
+  chatId = "",
+  input = "",
   setInput,
   status,
   stop,
-  attachments,
+  attachments = [],
   setAttachments,
   sendMessage,
-  messages,
+  messages = [],
   setMessages,
   regenerate,
   votes,
-  isReadonly,
-  selectedVisibilityType,
-  selectedModelId,
-}: {
-  chatId: string;
-  input: string;
-  setInput: Dispatch<SetStateAction<string>>;
-  status: UseChatHelpers<ChatMessage>["status"];
-  stop: UseChatHelpers<ChatMessage>["stop"];
-  attachments: Attachment[];
-  setAttachments: Dispatch<SetStateAction<Attachment[]>>;
-  messages: ChatMessage[];
-  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
-  votes: DBVote[] | undefined;
-  sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
-  regenerate: UseChatHelpers<ChatMessage>["regenerate"];
-  isReadonly: boolean;
-  selectedVisibilityType: DBVisibility;
-  selectedModelId: string;
-}) {
-  const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
+  isReadonly = false,
+  selectedVisibilityType = "private",
+  selectedModelId = "",
+}: ArtifactWindowProps) {
+  const { windows, closeWindow, updateWindow } = useWindowManager();
+  const windowState = windows.get(windowId);
+  
+  // Use artifact from window state if available, otherwise use prop
+  const currentArtifact = windowState?.artifactData ?? artifact;
 
   const {
     data: documents,
     isLoading: isDocumentsFetching,
     mutate: mutateDocuments,
   } = useSWR<DBDocument[]>(
-    artifact.documentId !== "init" && artifact.status !== "streaming"
-      ? `/api/document/${artifact.documentId}`
+    currentArtifact.documentId !== "init" && currentArtifact.status !== "streaming"
+      ? `/api/document/${currentArtifact.documentId}`
       : null,
     fetcher
   );
@@ -72,21 +84,31 @@ function PureArtifact({
   const [mode, setMode] = useState<"edit" | "diff">("edit");
   const [document, setDocument] = useState<DBDocument | null>(null);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
+  const [metadata, setMetadata] = useState<any>(null);
 
   useEffect(() => {
     if (documents && documents.length > 0) {
       const mostRecentDocument = documents.at(-1);
 
       if (mostRecentDocument) {
+        const newContent = mostRecentDocument.content ?? "";
         setDocument(mostRecentDocument);
         setCurrentVersionIndex(documents.length - 1);
-        setArtifact((currentArtifact) => ({
-          ...currentArtifact,
-          content: mostRecentDocument.content ?? "",
-        }));
+        
+        // Only update window if content is different to avoid infinite loops
+        const windowState = windows.get(windowId);
+        if (windowState?.artifactData && windowState.artifactData.content !== newContent) {
+          updateWindow(windowId, {
+            artifactData: {
+              ...windowState.artifactData,
+              content: newContent,
+            },
+          });
+        }
       }
     }
-  }, [documents, setArtifact]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documents]);
 
   useEffect(() => {
     mutateDocuments();
@@ -97,12 +119,12 @@ function PureArtifact({
 
   const handleContentChange = useCallback(
     (updatedContent: string) => {
-      if (!artifact) {
+      if (!currentArtifact) {
         return;
       }
 
       mutate<DBDocument[]>(
-        `/api/document/${artifact.documentId}`,
+        `/api/document/${currentArtifact.documentId}`,
         async (currentDocuments) => {
           if (!currentDocuments) {
             return [];
@@ -116,12 +138,12 @@ function PureArtifact({
           }
 
           if (currentDocument.content !== updatedContent) {
-            await fetch(`/api/document/${artifact.documentId}`, {
+            await fetch(`/api/document/${currentArtifact.documentId}`, {
               method: "POST",
               body: JSON.stringify({
-                title: artifact.title,
+                title: currentArtifact.title,
                 content: updatedContent,
-                kind: artifact.kind,
+                kind: currentArtifact.kind,
               }),
             });
 
@@ -140,7 +162,7 @@ function PureArtifact({
         { revalidate: false }
       );
     },
-    [artifact, mutate]
+    [currentArtifact, mutate]
   );
 
   const debouncedHandleContentChange = useDebounceCallback(
@@ -198,12 +220,6 @@ function PureArtifact({
 
   const [isToolbarVisible, setIsToolbarVisible] = useState(false);
 
-  /*
-   * NOTE: if there are no documents, or if
-   * the documents are being fetched, then
-   * we mark it as the current version.
-   */
-
   const isCurrentVersion =
     documents && documents.length > 0
       ? currentVersionIndex === documents.length - 1
@@ -217,53 +233,25 @@ function PureArtifact({
     throw new Error("Artifact definition not found!");
   }
 
-  const { createWindow, windows } = useWindowManager();
-  const windowId = `artifact-${artifact.documentId}`;
-
   useEffect(() => {
-    if (artifact.documentId !== "init" && artifactDefinition.initialize) {
+    if (currentArtifact.documentId !== "init" && artifactDefinition.initialize) {
       artifactDefinition.initialize({
-        documentId: artifact.documentId,
+        documentId: currentArtifact.documentId,
         setMetadata,
       });
     }
-  }, [artifact.documentId, artifactDefinition, setMetadata]);
+  }, [currentArtifact.documentId, artifactDefinition]);
 
-  useEffect(() => {
-    if (artifact.isVisible && artifact.documentId !== "init") {
-      createWindow(windowId, {
-        x: artifact.boundingBox.left || 100,
-        y: artifact.boundingBox.top || 100,
-        width: Math.max(720, artifact.boundingBox.width || 720),
-        height: Math.max(540, artifact.boundingBox.height || 540),
-      });
-    }
-  }, [artifact.isVisible, artifact.documentId, windowId, createWindow, artifact.boundingBox]);
-
-  if (!artifact.isVisible || artifact.documentId === "init") {
+  if (!windowState || currentArtifact.documentId === "init") {
     return null;
   }
 
-  const windowState = windows.get(windowId);
-  if (!windowState) {
-    return null;
-  }
+  const handleClose = () => {
+    closeWindow(windowId);
+  };
 
   return (
-    <Window
-      id={windowId}
-      title={artifact.title || "Untitled Document"}
-      onClose={() => {
-        setArtifact((currentArtifact) =>
-          currentArtifact.status === "streaming"
-            ? {
-                ...currentArtifact,
-                isVisible: false,
-              }
-            : { ...initialArtifactData, status: "idle" }
-        );
-      }}
-    >
+    <Window id={windowId} title={currentArtifact.title || "Untitled Document"} onClose={handleClose}>
       <div className="flex h-full flex-col bg-background">
         <div className="flex flex-row items-start justify-between p-4 border-b">
           <div className="flex flex-row items-start gap-4">
@@ -289,7 +277,7 @@ function PureArtifact({
           </div>
 
           <ArtifactActions
-            artifact={artifact}
+            artifact={currentArtifact}
             currentVersionIndex={currentVersionIndex}
             handleVersionChange={handleVersionChange}
             isCurrentVersion={isCurrentVersion}
@@ -303,33 +291,33 @@ function PureArtifact({
           <artifactDefinition.content
             content={
               isCurrentVersion
-                ? artifact.content
+                ? (document?.content ?? currentArtifact.content ?? "")
                 : getDocumentContentById(currentVersionIndex)
             }
             currentVersionIndex={currentVersionIndex}
             getDocumentContentById={getDocumentContentById}
             isCurrentVersion={isCurrentVersion}
             isInline={false}
-            isLoading={isDocumentsFetching && !artifact.content}
+            isLoading={isDocumentsFetching && !document?.content}
             metadata={metadata}
             mode={mode}
             onSaveContent={saveContent}
             setMetadata={setMetadata}
-            status={artifact.status}
+            status={currentArtifact.status}
             suggestions={[]}
-            title={artifact.title}
+            title={currentArtifact.title}
           />
 
           <AnimatePresence>
-            {isCurrentVersion && (
+            {isCurrentVersion && sendMessage && (
               <Toolbar
-                artifactKind={artifact.kind}
+                artifactKind={currentArtifact.kind}
                 isToolbarVisible={isToolbarVisible}
                 sendMessage={sendMessage}
                 setIsToolbarVisible={setIsToolbarVisible}
-                setMessages={setMessages}
-                status={status}
-                stop={stop}
+                setMessages={setMessages!}
+                status={status!}
+                stop={stop!}
               />
             )}
           </AnimatePresence>
@@ -339,7 +327,7 @@ function PureArtifact({
           {!isCurrentVersion && (
             <VersionFooter
               currentVersionIndex={currentVersionIndex}
-              documents={documents}
+              documents={documents || []}
               handleVersionChange={handleVersionChange}
             />
           )}
@@ -349,22 +337,5 @@ function PureArtifact({
   );
 }
 
-export const Artifact = memo(PureArtifact, (prevProps, nextProps) => {
-  if (prevProps.status !== nextProps.status) {
-    return false;
-  }
-  if (!equal(prevProps.votes, nextProps.votes)) {
-    return false;
-  }
-  if (prevProps.input !== nextProps.input) {
-    return false;
-  }
-  if (!equal(prevProps.messages, nextProps.messages.length)) {
-    return false;
-  }
-  if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
-    return false;
-  }
+export const ArtifactWindow = memo(PureArtifactWindow);
 
-  return true;
-});

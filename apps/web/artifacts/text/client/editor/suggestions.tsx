@@ -1,5 +1,5 @@
 import { DBArtifactKind, DBSuggestion } from "@workspace/database/types";
-import { CrossIcon, MessageSquareIcon } from "@workspace/icons/lucide";
+import { MessageSquareIcon, XIcon } from "@workspace/icons/lucide";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -197,7 +197,7 @@ const PreviewSuggestion = ({
               }}
               type="button"
             >
-              <CrossIcon size={12} />
+              <XIcon size={12} />
             </button>
           </div>
           <div>{suggestion.description}</div>

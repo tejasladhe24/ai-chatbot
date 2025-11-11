@@ -18,7 +18,7 @@ import type { DBChat, DBVote } from "@workspace/database/types";
 import { ChatSDKError } from "@/lib/errors";
 import type { Attachment, ChatMessage, AppUsage } from "@workspace/ai";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
-import { Artifact } from "../artifact";
+import { ArtifactWindows } from "../artifact/artifact-windows";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { toast } from "sonner";
@@ -248,7 +248,7 @@ export function Chat({
         </div>
       </div>
 
-      <Artifact
+      <ArtifactWindows
         attachments={attachments}
         chatId={id}
         input={input}

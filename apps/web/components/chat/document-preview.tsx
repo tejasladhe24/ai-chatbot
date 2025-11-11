@@ -11,6 +11,7 @@ import {
 } from "react";
 import useSWR from "swr";
 import { useArtifact } from "@/hooks/use-artifact";
+import { useWindowManager } from "@/components/provider/window-manager-provider";
 import type { DBArtifactKind, DBDocument } from "@workspace/database/types";
 import { fetcher } from "@/lib/utils";
 import { InlineDocumentSkeleton } from "./document-skeleton";
@@ -44,8 +45,6 @@ export function DocumentPreview({
   const { data: documents, isLoading: isDocumentsFetching } = useSWR<
     DBDocument[]
   >(result ? `/api/document/${result.id}` : null, fetcher);
-
-  console.log("documents", documents);
 
   const previewDocument = useMemo(() => documents?.[0], [documents]);
   const hitboxRef = useRef<HTMLDivElement>(null);
@@ -166,29 +165,61 @@ const PureHitboxLayer = ({
     updaterFn: UIArtifact | ((currentArtifact: UIArtifact) => UIArtifact)
   ) => void;
 }) => {
+  const { createWindow, windows, focusWindow } = useWindowManager();
+  const { artifact: currentArtifact } = useArtifact();
+
   const handleClick = useCallback(
     (event: MouseEvent<HTMLElement>) => {
       const boundingBox = event.currentTarget.getBoundingClientRect();
+      const windowId = `artifact-${result.id}`;
 
-      setArtifact((artifact) =>
-        artifact.status === "streaming"
-          ? { ...artifact, isVisible: true }
-          : {
-              ...artifact,
-              title: result.title,
-              documentId: result.id,
-              kind: result.kind,
-              isVisible: true,
-              boundingBox: {
-                left: boundingBox.x,
-                top: boundingBox.y,
-                width: boundingBox.width,
-                height: boundingBox.height,
-              },
-            }
+      // Check if window already exists
+      const existingWindow = windows.get(windowId);
+      if (existingWindow) {
+        // Focus existing window
+        focusWindow(windowId);
+        return;
+      }
+
+      // For streaming artifacts, still use setArtifact
+      if (currentArtifact.status === "streaming") {
+        setArtifact((artifact) => ({ ...artifact, isVisible: true }));
+        return;
+      }
+
+      // Create new window with artifact data
+      createWindow(
+        windowId,
+        {
+          x: boundingBox.x,
+          y: boundingBox.y,
+          width: Math.max(720, boundingBox.width || 720),
+          height: Math.max(540, boundingBox.height || 540),
+        },
+        {
+          documentId: result.id,
+          kind: result.kind,
+          title: result.title,
+          content: "",
+          isVisible: true,
+          status: "idle",
+          boundingBox: {
+            left: boundingBox.x,
+            top: boundingBox.y,
+            width: boundingBox.width,
+            height: boundingBox.height,
+          },
+        }
       );
     },
-    [setArtifact, result]
+    [
+      setArtifact,
+      result,
+      createWindow,
+      windows,
+      focusWindow,
+      currentArtifact.status,
+    ]
   );
 
   return (

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { DataStreamProvider } from "@/components/provider/data-stream-provider";
+import { WindowManagerProvider } from "@/components/provider/window-manager-provider";
 
 export default async function Layout({
   children,
@@ -22,7 +23,9 @@ export default async function Layout({
 
   return (
     <div className="h-svh overflow-hidden">
-      <DataStreamProvider>{children}</DataStreamProvider>
+      <DataStreamProvider>
+        <WindowManagerProvider>{children}</WindowManagerProvider>
+      </DataStreamProvider>
     </div>
   );
 }

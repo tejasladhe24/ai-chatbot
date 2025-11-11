@@ -38,7 +38,7 @@ const PureChatItem = ({
   });
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex gap-2">
       <Link
         href={`/chat/${chat.id}`}
         className={cn(
@@ -52,7 +52,10 @@ const PureChatItem = ({
       <DropdownMenu modal={true}>
         <DropdownMenuTrigger asChild>
           <Button
-            className={cn("mr-0.5 size-fit p-1", isActive && "bg-accent")}
+            className={cn(
+              "mr-0.5 size-fit p-1 ml-auto",
+              isActive && "bg-accent"
+            )}
             variant="ghost"
             size="icon"
           >

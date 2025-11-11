@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { toast } from "sonner";
 import { useArtifact } from "@/hooks/use-artifact";
+import { useWindowManager } from "@/components/provider/window-manager-provider";
 import type { DBArtifactKind } from "@workspace/database/types";
 import {
   FileIcon,
@@ -38,7 +39,7 @@ function PureDocumentToolResult({
   result,
   isReadonly,
 }: DocumentToolResultProps) {
-  const { setArtifact } = useArtifact();
+  const { createWindow, windows, focusWindow } = useWindowManager();
 
   return (
     <button
@@ -52,23 +53,40 @@ function PureDocumentToolResult({
         }
 
         const rect = event.currentTarget.getBoundingClientRect();
+        const windowId = `artifact-${result.id}`;
 
-        const boundingBox = {
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        };
+        // Check if window already exists, if so just focus it
+        const existingWindow = windows.get(windowId);
+        if (existingWindow) {
+          // Window exists, focus it
+          focusWindow(windowId);
+          return;
+        }
 
-        setArtifact((currentArtifact) => ({
-          documentId: result.id,
-          kind: result.kind,
-          content: currentArtifact.content,
-          title: result.title,
-          isVisible: true,
-          status: "idle",
-          boundingBox,
-        }));
+        // Create new window with artifact data
+        createWindow(
+          windowId,
+          {
+            x: rect.left,
+            y: rect.top,
+            width: Math.max(720, rect.width || 720),
+            height: Math.max(540, rect.height || 540),
+          },
+          {
+            documentId: result.id,
+            kind: result.kind,
+            content: "",
+            title: result.title,
+            isVisible: true,
+            status: "idle",
+            boundingBox: {
+              top: rect.top,
+              left: rect.left,
+              width: rect.width,
+              height: rect.height,
+            },
+          }
+        );
       }}
       type="button"
     >

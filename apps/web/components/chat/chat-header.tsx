@@ -3,6 +3,13 @@
 import { useRouter } from "next/navigation";
 import { memo } from "react";
 import { Button } from "@workspace/ui/components/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover";
+import { MessageSquareIcon } from "@workspace/icons/lucide";
+import { NavHistory } from "../nav-history";
 
 function PureChatHeader() {
   const router = useRouter();
@@ -18,6 +25,17 @@ function PureChatHeader() {
       >
         Axon
       </Button>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <MessageSquareIcon />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <NavHistory />
+        </PopoverContent>
+      </Popover>
     </header>
   );
 }
