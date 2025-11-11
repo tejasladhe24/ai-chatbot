@@ -1,15 +1,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { formatDistance } from "date-fns";
-import equal from "fast-deep-equal";
 import { AnimatePresence } from "framer-motion";
-import {
-  type Dispatch,
-  memo,
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useDebounceCallback } from "usehooks-ts";
 import { useArtifact, initialArtifactData } from "@/hooks/use-artifact";
@@ -17,44 +9,22 @@ import { fetcher } from "@/lib/utils";
 import { ArtifactActions } from "./artifact-actions";
 import { Toolbar } from "./toolbar";
 import { VersionFooter } from "./version-footer";
-import { DBDocument, DBVisibility, DBVote } from "@workspace/database/types";
-import { Attachment, ChatMessage } from "@workspace/ai";
+import { DBDocument } from "@workspace/database/types";
+import { ChatMessage } from "@workspace/ai";
 import { artifactDefinitions } from "@/artifacts/artifact-definitions";
 import { Window } from "../window";
 import { useWindowManager } from "../provider/window-manager-provider";
 
 function PureArtifact({
-  chatId,
-  input,
-  setInput,
   status,
   stop,
-  attachments,
-  setAttachments,
   sendMessage,
-  messages,
   setMessages,
-  regenerate,
-  votes,
-  isReadonly,
-  selectedVisibilityType,
-  selectedModelId,
 }: {
-  chatId: string;
-  input: string;
-  setInput: Dispatch<SetStateAction<string>>;
   status: UseChatHelpers<ChatMessage>["status"];
   stop: UseChatHelpers<ChatMessage>["stop"];
-  attachments: Attachment[];
-  setAttachments: Dispatch<SetStateAction<Attachment[]>>;
-  messages: ChatMessage[];
-  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
-  votes: DBVote[] | undefined;
   sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
-  regenerate: UseChatHelpers<ChatMessage>["regenerate"];
-  isReadonly: boolean;
-  selectedVisibilityType: DBVisibility;
-  selectedModelId: string;
+  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
 }) {
   const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
 
@@ -238,7 +208,13 @@ function PureArtifact({
         height: Math.max(540, artifact.boundingBox.height || 540),
       });
     }
-  }, [artifact.isVisible, artifact.documentId, windowId, createWindow, artifact.boundingBox]);
+  }, [
+    artifact.isVisible,
+    artifact.documentId,
+    windowId,
+    createWindow,
+    artifact.boundingBox,
+  ]);
 
   if (!artifact.isVisible || artifact.documentId === "init") {
     return null;
@@ -353,18 +329,5 @@ export const Artifact = memo(PureArtifact, (prevProps, nextProps) => {
   if (prevProps.status !== nextProps.status) {
     return false;
   }
-  if (!equal(prevProps.votes, nextProps.votes)) {
-    return false;
-  }
-  if (prevProps.input !== nextProps.input) {
-    return false;
-  }
-  if (!equal(prevProps.messages, nextProps.messages.length)) {
-    return false;
-  }
-  if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
-    return false;
-  }
-
   return true;
 });

@@ -57,25 +57,13 @@ export function ArtifactWindows({
             key={windowState.id}
             windowId={windowState.id}
             artifact={windowState.artifactData}
-            chatId={chatId}
-            input={input}
-            setInput={setInput}
             status={status}
             stop={stop}
-            attachments={attachments}
-            setAttachments={setAttachments}
             sendMessage={sendMessage}
-            messages={messages}
             setMessages={setMessages}
-            regenerate={regenerate}
-            votes={votes}
-            isReadonly={isReadonly}
-            selectedVisibilityType={selectedVisibilityType}
-            selectedModelId={selectedModelId}
           />
         );
       })}
     </>
   );
 }
-

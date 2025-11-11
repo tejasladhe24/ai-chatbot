@@ -3,70 +3,40 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { formatDistance } from "date-fns";
 import { AnimatePresence } from "framer-motion";
-import {
-  type Dispatch,
-  memo,
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useDebounceCallback } from "usehooks-ts";
 import { fetcher } from "@/lib/utils";
 import { ArtifactActions } from "./artifact-actions";
 import { Toolbar } from "./toolbar";
 import { VersionFooter } from "./version-footer";
-import { DBDocument, DBVisibility, DBVote } from "@workspace/database/types";
-import { Attachment, ChatMessage } from "@workspace/ai";
+import { DBDocument } from "@workspace/database/types";
+import { ChatMessage } from "@workspace/ai";
 import { artifactDefinitions } from "@/artifacts/artifact-definitions";
 import { Window } from "../window";
 import { useWindowManager } from "../provider/window-manager-provider";
 import type { UIArtifact } from "@workspace/artifact";
-import { initialArtifactData } from "@/hooks/use-artifact";
 
 type ArtifactWindowProps = {
   windowId: string;
   artifact: UIArtifact;
-  chatId?: string;
-  input?: string;
-  setInput?: Dispatch<SetStateAction<string>>;
   status?: UseChatHelpers<ChatMessage>["status"];
   stop?: UseChatHelpers<ChatMessage>["stop"];
-  attachments?: Attachment[];
-  setAttachments?: Dispatch<SetStateAction<Attachment[]>>;
   sendMessage?: UseChatHelpers<ChatMessage>["sendMessage"];
-  messages?: ChatMessage[];
   setMessages?: UseChatHelpers<ChatMessage>["setMessages"];
-  regenerate?: UseChatHelpers<ChatMessage>["regenerate"];
-  votes?: DBVote[] | undefined;
-  isReadonly?: boolean;
-  selectedVisibilityType?: DBVisibility;
-  selectedModelId?: string;
 };
 
 function PureArtifactWindow({
   windowId,
   artifact,
-  chatId = "",
-  input = "",
-  setInput,
   status,
   stop,
-  attachments = [],
-  setAttachments,
   sendMessage,
-  messages = [],
   setMessages,
-  regenerate,
-  votes,
-  isReadonly = false,
-  selectedVisibilityType = "private",
-  selectedModelId = "",
 }: ArtifactWindowProps) {
   const { windows, closeWindow, updateWindow } = useWindowManager();
   const windowState = windows.get(windowId);
-  
+
   // Use artifact from window state if available, otherwise use prop
   const currentArtifact = windowState?.artifactData ?? artifact;
 
@@ -75,7 +45,8 @@ function PureArtifactWindow({
     isLoading: isDocumentsFetching,
     mutate: mutateDocuments,
   } = useSWR<DBDocument[]>(
-    currentArtifact.documentId !== "init" && currentArtifact.status !== "streaming"
+    currentArtifact.documentId !== "init" &&
+      currentArtifact.status !== "streaming"
       ? `/api/document/${currentArtifact.documentId}`
       : null,
     fetcher
@@ -94,10 +65,13 @@ function PureArtifactWindow({
         const newContent = mostRecentDocument.content ?? "";
         setDocument(mostRecentDocument);
         setCurrentVersionIndex(documents.length - 1);
-        
+
         // Only update window if content is different to avoid infinite loops
         const windowState = windows.get(windowId);
-        if (windowState?.artifactData && windowState.artifactData.content !== newContent) {
+        if (
+          windowState?.artifactData &&
+          windowState.artifactData.content !== newContent
+        ) {
           updateWindow(windowId, {
             artifactData: {
               ...windowState.artifactData,
@@ -234,7 +208,10 @@ function PureArtifactWindow({
   }
 
   useEffect(() => {
-    if (currentArtifact.documentId !== "init" && artifactDefinition.initialize) {
+    if (
+      currentArtifact.documentId !== "init" &&
+      artifactDefinition.initialize
+    ) {
       artifactDefinition.initialize({
         documentId: currentArtifact.documentId,
         setMetadata,
@@ -251,7 +228,11 @@ function PureArtifactWindow({
   };
 
   return (
-    <Window id={windowId} title={currentArtifact.title || "Untitled Document"} onClose={handleClose}>
+    <Window
+      id={windowId}
+      title={currentArtifact.title || "Untitled Document"}
+      onClose={handleClose}
+    >
       <div className="flex h-full flex-col bg-background">
         <div className="flex flex-row items-start justify-between p-4 border-b">
           <div className="flex flex-row items-start gap-4">
@@ -338,4 +319,3 @@ function PureArtifactWindow({
 }
 
 export const ArtifactWindow = memo(PureArtifactWindow);
-
