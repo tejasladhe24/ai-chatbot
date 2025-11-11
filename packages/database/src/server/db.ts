@@ -46,7 +46,7 @@ export class DatabaseService {
         where: eq($user.email, email),
       });
       return user ?? null;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get user");
     }
   }
@@ -80,7 +80,7 @@ export class DatabaseService {
       }
 
       return chat;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to save chat");
     }
   }
@@ -119,7 +119,7 @@ export class DatabaseService {
         .returning();
 
       return { deletedCount: deletedChats.length };
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to delete all chats by member id");
     }
   }
@@ -138,7 +138,7 @@ export class DatabaseService {
     try {
       const extendedLimit = limit + 1;
 
-      const query = (whereCondition?: SQL<any>) =>
+      const query = (whereCondition?: SQL<unknown>) =>
         this.db
           .select()
           .from($chat)
@@ -189,7 +189,7 @@ export class DatabaseService {
         items: hasMore ? filteredChats.slice(0, limit) : filteredChats,
         hasMore,
       };
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get chats by member id");
     }
   }
@@ -205,7 +205,7 @@ export class DatabaseService {
       }
 
       return selectedChat;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get chat by id");
     }
   }
@@ -217,7 +217,7 @@ export class DatabaseService {
   }): Promise<DBMessage[]> {
     try {
       return await this.db.insert($message).values(messages).returning();
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to save messages");
     }
   }
@@ -229,7 +229,7 @@ export class DatabaseService {
         .from($message)
         .where(eq($message.chatId, id))
         .orderBy(asc($message.createdAt));
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get messages by chat id");
     }
   }
@@ -276,7 +276,7 @@ export class DatabaseService {
       }
 
       return newVote;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to vote message");
     }
   }
@@ -284,7 +284,7 @@ export class DatabaseService {
   async getVotesByChatId({ id }: { id: string }): Promise<DBVote[]> {
     try {
       return await this.db.select().from($vote).where(eq($vote.chatId, id));
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get votes by chat id");
     }
   }
@@ -320,7 +320,7 @@ export class DatabaseService {
       }
 
       return document;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to save document");
     }
   }
@@ -339,7 +339,7 @@ export class DatabaseService {
     try {
       const extendedLimit = limit + 1;
 
-      const query = (whereCondition?: SQL<any>) =>
+      const query = (whereCondition?: SQL<unknown>) =>
         this.db
           .select()
           .from($document)
@@ -390,7 +390,7 @@ export class DatabaseService {
         items: hasMore ? filteredDocuments.slice(0, limit) : filteredDocuments,
         hasMore,
       };
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get documents by member id");
     }
   }
@@ -404,7 +404,7 @@ export class DatabaseService {
         .orderBy(asc($document.createdAt));
 
       return documents;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get documents by id");
     }
   }
@@ -440,7 +440,7 @@ export class DatabaseService {
         .returning();
 
       return { deletedCount: deletedDocuments.length };
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to delete documents by id after timestamp");
     }
   }
@@ -508,7 +508,7 @@ export class DatabaseService {
       }
 
       return { deletedCount: 0 };
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to delete messages by chat id after timestamp");
     }
   }
@@ -528,7 +528,7 @@ export class DatabaseService {
         .returning();
 
       return updatedChat ?? null;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to update chat visibility by id");
     }
   }
@@ -559,7 +559,7 @@ export class DatabaseService {
         .execute();
 
       return stats?.count ?? 0;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get message count by user id");
     }
   }
@@ -575,7 +575,7 @@ export class DatabaseService {
       await this.db
         .insert($stream)
         .values({ id: streamId, chatId, createdAt: new Date() });
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to create stream id");
     }
   }
@@ -591,7 +591,7 @@ export class DatabaseService {
       });
 
       return streamIds.map(({ id }) => id);
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get stream ids by chat id");
     }
   }
@@ -615,7 +615,7 @@ export class DatabaseService {
       });
 
       return member ?? null;
-    } catch (_error) {
+    } catch (_) {
       throw new Error("Failed to get member by user id and organization id");
     }
   }

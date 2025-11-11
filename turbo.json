@@ -1,5 +1,22 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "BLOB_READ_WRITE_TOKEN",
+    "APP_URL",
+    "RESEND_API_KEY",
+    "EMAIL_SENDER_NAME",
+    "EMAIL_SENDER_ADDRESS",
+    "BETTER_AUTH_URL",
+    "BETTER_AUTH_DOMAIN",
+    "BETTER_AUTH_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "AI_GATEWAY_API_KEY",
+    "OPENAI_API_KEY"
+  ],
   "ui": "tui",
   "tasks": {
     "build": {
@@ -14,6 +31,10 @@
       "dependsOn": ["^check-types"]
     },
     "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
       "cache": false,
       "persistent": true
     }
