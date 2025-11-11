@@ -33,7 +33,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import type { ArtifactToolbarItem } from "@workspace/artifact";
 import type { DBArtifactKind } from "@workspace/database/types";
-import { artifactDefinitions } from "@/artifacts/artifact-definitions";
+import { artifactDefinitions } from "@/lib/artifact-definitions";
 import { generateUUID } from "@/lib/utils";
 
 type ToolProps = {

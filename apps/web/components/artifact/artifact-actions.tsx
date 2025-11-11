@@ -1,7 +1,7 @@
 import { type Dispatch, memo, type SetStateAction, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@workspace/ui/lib/utils";
-import { artifactDefinitions } from "@/artifacts/artifact-definitions";
+import { artifactDefinitions } from "@/lib/artifact-definitions";
 import type { ArtifactActionContext, UIArtifact } from "@workspace/artifact";
 import { Button } from "@workspace/ui/components/button";
 import {

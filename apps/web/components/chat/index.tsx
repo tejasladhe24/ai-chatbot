@@ -7,11 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { ChatHeader } from "./chat-header";
-import {
-  initialArtifactData,
-  useArtifact,
-  useArtifactSelector,
-} from "@/hooks/use-artifact";
+import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { DBChat, DBVote } from "@workspace/database/types";
@@ -25,7 +21,7 @@ import { toast } from "sonner";
 import type { DBVisibility } from "@workspace/database/types";
 import { getPaginationKey } from "@workspace/database/common";
 import { useDataStream } from "../provider/data-stream-provider";
-import { artifactDefinitions } from "@/artifacts/artifact-definitions";
+import { artifactDefinitions } from "@/lib/artifact-definitions";
 
 export function Chat({
   id,
@@ -131,8 +127,6 @@ export function Chat({
     fetcher
   );
 
-  const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
-
   useAutoResume({
     autoResume,
     initialMessages,
@@ -216,7 +210,6 @@ export function Chat({
 
         <Messages
           chatId={id}
-          isArtifactVisible={isArtifactVisible}
           isReadonly={isReadonly}
           messages={messages}
           regenerate={regenerate}

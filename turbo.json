@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "concurrency": "15",
   "globalEnv": [
     "NODE_ENV",
     "DATABASE_URL",
@@ -35,6 +36,10 @@
       "persistent": true
     },
     "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
       "cache": false,
       "persistent": true
     }

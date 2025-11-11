@@ -1,7 +1,6 @@
 import { toast } from "sonner";
 import { Artifact } from "@workspace/artifact";
 import { DiffView } from "./components/diffview";
-import { DocumentSkeleton } from "@/components/chat/document-skeleton";
 import { TextEditor } from "./components/text-editor";
 import {
   RotateCcwIcon,
@@ -11,8 +10,7 @@ import {
   RedoIcon,
   UndoIcon,
 } from "@workspace/icons/lucide";
-import { getSuggestions } from "../../actions";
-import { DBSuggestion } from "@workspace/database/types";
+import type { DBSuggestion } from "@workspace/database/types";
 
 type TextArtifactMetadata = {
   suggestions: DBSuggestion[];
@@ -22,7 +20,10 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
   kind: "text",
   description: "Useful for text content, like drafting essays and emails.",
   initialize: async ({ documentId, setMetadata }) => {
-    const suggestions = await getSuggestions({ documentId });
+    const suggestionsResponse = await fetch(
+      `/api/suggestions?documentId=${documentId}`
+    );
+    const suggestions = (await suggestionsResponse.json()) as DBSuggestion[];
 
     setMetadata({
       suggestions,
@@ -65,7 +66,17 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
     metadata,
   }) => {
     if (isLoading) {
-      return <DocumentSkeleton artifactKind="text" />;
+      return (
+        <div className="flex w-full flex-col gap-4">
+          <div className="h-12 w-1/2 animate-pulse rounded-lg bg-muted-foreground/20" />
+          <div className="h-5 w-full animate-pulse rounded-lg bg-muted-foreground/20" />
+          <div className="h-5 w-full animate-pulse rounded-lg bg-muted-foreground/20" />
+          <div className="h-5 w-1/3 animate-pulse rounded-lg bg-muted-foreground/20" />
+          <div className="h-5 w-52 animate-pulse rounded-lg bg-transparent" />
+          <div className="h-8 w-52 animate-pulse rounded-lg bg-muted-foreground/20" />
+          <div className="h-5 w-2/3 animate-pulse rounded-lg bg-muted-foreground/20" />
+        </div>
+      );
     }
 
     if (mode === "diff") {

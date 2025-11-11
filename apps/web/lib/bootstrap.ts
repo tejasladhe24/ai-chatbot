@@ -2,8 +2,10 @@ import { container } from "@workspace/di";
 import { customProvider, DocumentHandler, myProvider } from "@workspace/ai";
 import { databaseService } from "./db";
 import { DatabaseService } from "@workspace/database/server";
-import { imageDocumentHandler } from "@/artifacts/image/server";
-import { textDocumentHandler } from "@/artifacts/text/server";
+import { imageDocumentHandler } from "@artifacts/image-artifact/server";
+import { codeDocumentHandler } from "@artifacts/code-artifact/server";
+import { sheetDocumentHandler } from "@artifacts/sheet-artifact/server";
+import { textDocumentHandler } from "@artifacts/text-artifact/server";
 
 /**
  * Bootstrap the DI container with all required dependencies.
@@ -29,6 +31,16 @@ export function bootstrap(): void {
   container.registerInstance<DocumentHandler<"text">>(
     "DocumentHandler",
     textDocumentHandler
+  );
+
+  container.registerInstance<DocumentHandler<"code">>(
+    "DocumentHandler",
+    codeDocumentHandler
+  );
+
+  container.registerInstance<DocumentHandler<"sheet">>(
+    "DocumentHandler",
+    sheetDocumentHandler
   );
 
   console.log("bootstrap completed");

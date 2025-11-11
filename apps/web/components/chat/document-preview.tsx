@@ -21,10 +21,10 @@ import {
   ImageIcon,
   LoaderIcon,
 } from "@workspace/icons/lucide";
-import { ImageEditor } from "@/artifacts/image/client/components/image-editor";
-import { CodeEditor } from "@/artifacts/code/client/components/code-editor";
-import { SpreadsheetEditor } from "@/artifacts/sheet/client/components/sheet-editor";
-import { TextEditor } from "@/artifacts/text/client/components/text-editor";
+import { Preview as ImageEditor } from "@artifacts/image-artifact/client";
+import { Preview as CodeEditor } from "@artifacts/code-artifact/client";
+import { Preview as SpreadsheetEditor } from "@artifacts/sheet-artifact/client";
+import { Preview as TextEditor } from "@artifacts/text-artifact/client";
 import { DocumentToolCall, DocumentToolResult } from "./document";
 import { UIArtifact } from "@workspace/artifact";
 import { cn } from "@workspace/ui/lib/utils";

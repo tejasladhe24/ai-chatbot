@@ -177,16 +177,8 @@ export function WindowManagerProvider({
       }
     });
 
-    console.log("Dock items calculated:", items.length, items);
     return items;
   }, [windows, focusWindow]);
-
-  console.log(
-    "WindowManagerProvider rendering, windows:",
-    windows.size,
-    "dockItems:",
-    dockItems.length
-  );
 
   return (
     <WindowManagerContext.Provider

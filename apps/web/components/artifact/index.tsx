@@ -11,7 +11,7 @@ import { Toolbar } from "./toolbar";
 import { VersionFooter } from "./version-footer";
 import { DBDocument } from "@workspace/database/types";
 import { ChatMessage } from "@workspace/ai";
-import { artifactDefinitions } from "@/artifacts/artifact-definitions";
+import { artifactDefinitions } from "@/lib/artifact-definitions";
 import { Window } from "../window";
 import { useWindowManager } from "../provider/window-manager-provider";
 

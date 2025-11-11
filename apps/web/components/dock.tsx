@@ -46,10 +46,7 @@ const getArtifactIcon = (kind?: DBArtifactKind) => {
 export const Dock = ({ items, className, ...props }: DockProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log("Dock component rendering, items:", items.length, items);
-
   if (items.length === 0) {
-    console.log("Dock returning null because items.length is 0");
     return null;
   }
 

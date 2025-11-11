@@ -14,7 +14,7 @@ import {
   RedoIcon,
   UndoIcon,
 } from "@workspace/icons/lucide";
-import { generateUUID } from "@/lib/utils";
+import { v4 as uuidv4 } from "uuid";
 
 const OUTPUT_HANDLERS = {
   matplotlib: `
@@ -117,7 +117,7 @@ export const codeArtifact = new Artifact<"code", Metadata>({
       label: "Run",
       description: "Execute code",
       onClick: async ({ content, setMetadata }) => {
-        const runId = generateUUID();
+        const runId = uuidv4();
         const outputContent: ConsoleOutputContent[] = [];
 
         setMetadata((metadata) => ({

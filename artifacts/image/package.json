@@ -1,0 +1,49 @@
+{
+  "name": "@artifacts/image-artifact",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "pnpm build:server && pnpm build:client",
+    "build:server": "tsup --config tsup.server.config.ts",
+    "build:client": "tsup --config tsup.client.config.ts",
+    "clean": "rm -rf node_modules .turbo dist",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.64"
+  },
+  "devDependencies": {
+    "@configs/eslint-config": "workspace:*",
+    "@configs/typescript-config": "workspace:*",
+    "eslint": "^9.32.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "@workspace/ai": "workspace:*",
+    "@workspace/artifact": "workspace:0.0.1",
+    "@workspace/database": "workspace:0.0.1",
+    "@workspace/icons": "workspace:0.0.1",
+    "@workspace/ui": "workspace:0.0.1",
+    "@workspace/di": "workspace:*",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "sonner": "^2.0.7",
+    "zod": "^3.25.76"
+  },
+  "exports": {
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js",
+      "require": "./dist/client/index.cjs"
+    }
+  }
+}
